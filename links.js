@@ -1,33 +1,32 @@
 (function () {
+    let storage = chrome.storage.local;
     function getStorage(detail, fun, showDuplicate) {
-        chrome.storage.local.get([detail], (e) => { fun(e, showDuplicate) });
+        storage.get([detail], (e) => { fun(e, showDuplicate) });
     }
     function handleValue(value, showDuplicate) {
-        if (value.data.length <= 0) {
+        let data = value.data;
+        if (data.length <= 0) {
             let wholeElement = `<h1 class='alert'>You have no links</h1>`;
-            document.querySelector(".container").insertAdjacentHTML('beforeend', wholeElement);
+            document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
+            updateLinkCount(0,0,0)
         } else {
             let wholeElement = '',
-                filteredValue;
+                filteredValue = [];
             let dupe = [], linkClass, duplicate;
             if (showDuplicate === false) {
-                filteredValue = value.data.reduce(function (a, b, i) {
-                    if (i !== 0) {
-                        let links = [];
-                        a.forEach(e => {
-                            links.push(e.href);
-                        });
-                        if (links.indexOf(b.href) < 0) { a.push(b) } else { dupe.push(b.href) }
-                        return a;
-                    } else {
-                        a.push(b);
-                        return a;
-                    }
-                }, []);
-                duplicate = value.data.length - filteredValue.length;
-                updateLinkCount(filteredValue.length, value.data.length, duplicate);
+                filteredValue = duplicateMin();
+                duplicate = data.length - filteredValue.length;
+                updateLinkCount(filteredValue.length, data.length, duplicate);
             } else {
-                filteredValue = value.data.reduce(function (a, b, i) {
+                let filLen = 0;
+                filteredValue = duplicateMin();
+                filLen = filteredValue.length;
+                duplicate = data.length - filLen;
+                filteredValue = data;
+                updateLinkCount(filLen, filLen, duplicate);
+            }
+            function duplicateMin() {
+                return data.reduce(function (a, b, i) {
                     if (i !== 0) {
                         let links = [];
                         a.forEach(e => {
@@ -40,118 +39,90 @@
                         return a;
                     }
                 }, []);
-
-                duplicate = value.data.length - filteredValue.length;
-                filteredValue = value.data;
-                updateLinkCount(filteredValue.length, filteredValue.length, duplicate);
             }
             filteredValue.forEach((element, i) => {
-                if (dupe.indexOf(element.href) !== -1) {
-                    linkClass = 'dupe';
-                } else {
-                    linkClass = '';
-                }
+                dupe.indexOf(element.href) !== -1 ? linkClass = "dupe" : linkClass = "";
                 wholeElement += `<div class="linkCon">
-        <span class="numbers">${++i}</span>
+        <span class="numbers" data-id='${i + 1}'>${i + 1}</span>
         <div class="line"></div>
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
          <button class='bin'><i class="fa fa-trash" aria-hidden="true"></i></button>
         </div>`;
                 function isAvail(val) {
-                    if (val.trim() === "") {
-                        return "No text available";
-                    } else {
-                        return val;
-                    }
+                    return val.trim() === "" ? "No text available" : val;
                 }
             });
-            document.querySelector(".container").insertAdjacentHTML('beforeend', wholeElement);
-            handleDelete();
+            document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
         }
     }
-
     getStorage("data", handleValue, false);
     // add delete event lisener 
     function updateLinkCount(shownValue, total, duplicates) {
-        let shownLink = document.querySelector(".shownLink"),
-            totalLink = document.querySelector(".linkNum"),
-            dupe = document.querySelector(".duplicates");
-        dupe.innerText = duplicates;
-        shownLink.innerText = shownValue;
-        totalLink.innerText = total;
-
+        document.querySelector("span.duplicates").innerText = duplicates;
+        document.querySelector("span.shownLink").innerText = shownValue;
+        document.querySelector("span.linkNum").innerText = total;
     }
+    handleDelete();
     function handleDelete() {
-        let btn = document.querySelectorAll(".bin");
-        for (let i = 0; i < btn.length; i++) {
-            btn[i].addEventListener("click", (ev) => {
-                console.log(ev);
-                let id;
-                if (ev.target.parentElement.tagName === "BUTTON") {
-                    id = Number(ev.target.parentElement.parentElement.querySelector(".numbers").innerText);
-                } else {
-                    id = Number(ev.target.parentElement.querySelector(".numbers").innerText);
+        let div = document.querySelector("div.container");
+        div.addEventListener("click", ev => {
+           let clickedOn = ev.target;
+            if (clickedOn.tagName === "BUTTON" || clickedOn.tagName ==="I") {
+                if (clickedOn.tagName === "BUTTON"){
+                    if (clickedOn.classList.contains("bin") === false){
+                        return false;
+                    }
                 }
-
+                let cbDuplicate = document.querySelector("input#checkboxInput"),
+                    cBoxStatus;
+                cbDuplicate.checked ? cBoxStatus = true : cBoxStatus = false;
+                let id, parent = clickedOn.parentElement;
+                if (parent.tagName === "BUTTON") {
+                    id = Number(parent.parentElement.querySelector("span.numbers").getAttribute('data-id'));
+                } else {
+                    id = Number(parent.querySelector("span.numbers").getAttribute('data-id'));
+                }
                 id = --id;
                 function delData(val) {
+                    console.log(val);
                     let data = val.data.map(e => e);
                     data.splice(id, 1);
-                    chrome.storage.local.set({ data }, (e) => {
-                        if (e === undefined) {
-                            let cbDuplicate = document.querySelector("#checkboxInput");
-                            if (cbDuplicate.checked) {
-                                removeList(true)
-                            } else {
-                                removeList(false)
-
-                            }
-                        }
-
+                    storage.set({ data }, e => {
+                        if (e === undefined) removeList(cBoxStatus);
                     });
-
                 }
-                getStorage("data", delData);
-
-            });
-
-        }
-    }
-    let cbDuplicate = document.querySelector("#checkboxInput");
-    cbDuplicate.addEventListener("change", showDuplicateFun);
-    function showDuplicateFun(e) {
-        let showLink = document.querySelector(".shownLink"), linkNum = document.getElementsByClassName("linkNum")[0]; 
-        if(Number(showLink.innerText)!==Number(linkNum.innerText)){
-            if (cbDuplicate.checked) {
-                removeList(true)
-            } else {
-                removeList(false)
-
+                getStorage("data", delData, cBoxStatus);
             }
-        }
+        });
     }
-
+    let cbDuplicate = document.querySelector("input[type='checkbox']#checkboxInput");
+    cbDuplicate.addEventListener("change", e => {
+        if (Number(document.querySelector("span.duplicates").innerText) > 0) { cbDuplicate.checked ? removeList(true) : removeList(false); }
+    });
     function removeList(showDuplicate) {
-        let linkCon = document.querySelectorAll(".linkCon");
-        for (let i = 0; i < linkCon.length; i++) {
+        let linkCon = document.querySelectorAll("div.linkCon"), i, len = linkCon.length;
+        for (i = 0; i < len; i++) {
             linkCon[i].parentElement.removeChild(linkCon[i]);
         }
         getStorage("data", handleValue, showDuplicate);
     }
     //manage copy action
-    let copyBtn = document.querySelector(".copyButton");
+    let copyBtn = document.querySelector("button.copyButton");
     copyBtn.addEventListener("click", handleCopy);
     function handleCopy() {
-        chrome.storage.local.get(["data"], copyToClipboard);
+        storage.get(["data"], copyToClipboard);
         function copyToClipboard(text) {
+            if(text.data.length===0){
+                swal("No links","You have no links available","info");
+                return;
+            }
             let dataToCopy = '';
             text.data.forEach(e => {
                 dataToCopy += `${e.href} \n`;
             });
             const input = document.createElement('input');
-            input.style.position = 'fixed';
-            input.style.opacity = 0;
+            input.setAttribute("style", `position: fixed;opacity:0;`);
             input.value = dataToCopy;
             document.body.appendChild(input);
             input.select();
@@ -161,10 +132,10 @@
         }
 
     }
-    let delDuplicate = document.querySelector(".delDuplicate");
+    let delDuplicate = document.querySelector("button.delDuplicate");
     delDuplicate.addEventListener("click", handleDupeDel);
     function handleDupeDel(e) {
-        chrome.storage.local.get(['data'], value => {
+        storage.get(['data'], value => {
             let filteredValue = value.data.reduce(function (a, b, i) {
                 if (i !== 0) {
                     let links = [];
@@ -181,32 +152,39 @@
             if (value.data.length === filteredValue.length) {
                 swal("No duplicates", "You have no duplicates for deleting", "info");
             } else {
-                chrome.storage.local.set({ data: filteredValue }, error => {
+                storage.set({ data: filteredValue }, error => {
                     swal("Success", "Duplicates deleted", "success");
-                    removeList("false");
+                    removeList(false);
                 });
             }
 
         })
     }
-    let searchBox = document.querySelector("#filter");
-    searchBox.addEventListener("keyup",handleSearch); 
-   function handleSearch(e){
-      let links = document.getElementsByClassName("link"),value = searchBox.value;
-      for (let i = 0; i < links.length; i++) {
-          linkCon = links[i].parentElement;
-         linkCon.classList.remove("hideLinkCon");
-          linkCon.classList.remove("showThis");
-        if(links[i].innerText.indexOf(value) ===-1){
-            linkCon.classList.add("hideLinkCon");
-        }else{
-            linkCon.classList.add("showThis");
+    let searchBox = document.querySelector("input#filter");
+    searchBox.addEventListener("keyup", handleSearch);
+    function handleSearch(e) {
+        let links = document.querySelectorAll("a.link"), value = searchBox.value.trim().toLowerCase();
+        valueForReg = value;
+        valueForReg = valueForReg.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+        if (value == "") { if (e.keyCode !== 8) return; };
+        let i, len = links.length;
+        for (i = 0; i < len; i++) {
+            link = links[i];
+            linkCon = link.parentElement, clsList = linkCon.classList;
+            clsList.remove("hideLinkCon", "showThis");
+            if (RegExp(valueForReg, 'i').test(link.innerText) === false) {
+                clsList.add("hideLinkCon");
+            } else {
+                clsList.add("showThis");
+                valueForLink = link.innerText.replace(RegExp(valueForReg, 'gi'), `<span class='lightup'>${value}</span>`);
+                link.innerText = "";
+                link.insertAdjacentHTML("beforeend", valueForLink);
+            }
         }
-      }
-      let putNum = document.getElementsByClassName("showThis");
-       for (let i = 0; i < putNum.length; i++) {
-        putNum[i].firstElementChild.innerText = i+1;
-      }
+        let putNum = document.getElementsByClassName("div.showThis");
+        let n, plen = putNum.length;
+        for (n = 0; n < plen; n++) {
+            putNum[n].firstElementChild.innerText = n + 1;
+        }
     }
-
 })()
