@@ -170,3 +170,7 @@ outline: none;
 .hideLinkCon{
     display: none;
 }
+.lightup{
+    font-size: 16px;
+    background-color: rgb(89, 244, 255);
+}
