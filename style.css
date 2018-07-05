@@ -1,0 +1,72 @@
+*{
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.container{
+    width: 350px;
+    height: 275px;
+}
+.button{
+    width: 80%;
+    height: 45px;
+    margin-left:10%;
+    margin-right: 10%;
+    margin-top: 10px;
+    display: block;
+}
+.page-count{
+ height: 100px;
+}
+button{
+    border: none;
+    background-color: rgb(27, 230, 186);
+    color: #ffffff;
+    border-radius: 3px;
+    cursor: pointer;
+    box-shadow: 2px 2px 4px #9c9c9c;
+}
+button:focus{
+    outline: none;
+    
+}
+.input{
+    width: 30%;
+     height: 30px;
+     border: none;
+     border-bottom: 2px solid #a5a5a5;
+     display: inline-block;
+}
+.input:focus{
+   outline: none;
+}
+.save{
+    padding: 10px 20px;
+}
+.tags{
+    display: block;
+}
+.tag{
+      width: 30%;
+      display: inline-block;
+      text-align: center;
+}
+.del-button > .tag {
+   display: inline;
+   text-align: center;
+}
+.del-button > .input {
+   width: 25%;
+}
+button:active {
+    box-shadow: none;
+}
+.twoBtn{
+    display: flex;
+    justify-content: space-around;
+}
+.inner-btn{
+    height: 45px;
+    flex-grow: 1;
+}
+.even{
+    margin-left: 10px;
+}

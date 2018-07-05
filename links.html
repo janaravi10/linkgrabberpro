@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="sweetAlert/sweetAlert.css">
+    <link rel="stylesheet" href="links.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt"
+        crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>
+                Links which you have been collecting!
+            </h1>
+        </div>
+        <div class="option">
+            <div class="showDuplicate optionElement">
+                <input type="checkbox" name="" id="checkboxInput">
+                <p>Show duplicates</p>
+            </div>
+
+            <button class="optionElement copyButton"> copy &nbsp;
+                <span class="shownLink"> </span>&nbsp;/&nbsp;
+                <span class="linkNum"></span>
+                
+            </button>
+            <button class="optionElement delDuplicate"> Delete duplicate &nbsp;
+              <span class="duplicates">0</span>
+            </button>
+            <div class="tooltip copytooltip">copy only links to your clipboard</div>
+               <div class="csvtooltip tooltip">copy links and links text which will be enter into specific columns of your excel</div>
+               
+                   <input type="text" name="" id="filter" class="optionElement" placeholder="search links..">
+               
+
+        </div>
+    </div>
+    
+    <script src="sweetAlert/sweetalert.min.js"></script>
+    <script src="links.js"></script>
+</body>
+
+</html>
