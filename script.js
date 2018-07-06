@@ -99,5 +99,15 @@ function wrapper() {
 //show current tab links
 let btnStoredLinks = document.getElementById('storedLinks');
 btnStoredLinks.addEventListener('click',e=>{
-    window.open("links.html");
+    chrome.tabs.create({ active: true, url: chrome.runtime.getURL("links.html") });
+})
+let showTabLink = document.querySelector('#showTabLinks');
+showTabLink.addEventListener("click",e=>{
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, { getAllLinks: true }, function (response) {
+            if (response.links.length) {
+                chrome.tabs.create({ active: true, url: chrome.runtime.getURL("tablinks.html")});
+            }
+        });
+    });
 })
