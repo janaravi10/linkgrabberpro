@@ -19,7 +19,7 @@ function handleSearch(e) {
             link.insertAdjacentHTML("beforeend", valueForLink);
         }
     }
-    let putNum = document.getElementsByClassName("div.showThis");
+    let putNum = document.querySelectorAll("div.showThis");
     let n, plen = putNum.length;
     for (n = 0; n < plen; n++) {
         putNum[n].firstElementChild.innerText = n + 1;
