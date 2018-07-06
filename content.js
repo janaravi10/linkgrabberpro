@@ -1,13 +1,11 @@
 (function () {
     //adding element
-    let element = document.createElement("div");
+    let cRun = chrome.runtime,
+        element = document.createElement("div");
     element.className = "resizeBox";
     document.body.appendChild(element);
-    let altElement = document.createElement("div");
-    altElement.className = "altBox";
-    document.body.appendChild(altElement);
     //code for deleting event listener
-    let disposer, isCtrlPressed=false;
+    let disposer, isCtrlPressed = false;
     const ownAddEventListener = (scope, type, handler, capture) => {
         scope.addEventListener(type, handler, capture);
         return () => {
@@ -18,65 +16,53 @@
     window.addEventListener("mouseup", function (e) {
         if (e.altKey === true) {
             return;
-        }else if (e.ctrlKey === false && isCtrlPressed == false) {
+        } else if (e.ctrlKey === false && isCtrlPressed == false) {
             return;
-        } 
+        }
         disposer();
-        let boxMeasures = element.getBoundingClientRect();
-        let elWidth = boxMeasures.width,
+        let boxMeasures = element.getBoundingClientRect(),
+            elWidth = boxMeasures.width,
             elHeight = boxMeasures.height,
             elX = boxMeasures.x,
             elY = boxMeasures.y;
-        if (e.ctrlKey === false || isCtrlPressed == false){
-            element.style.display = "none";
-            element.style.height = "0px";
-            element.style.width = "0px";
+        if (e.ctrlKey === false || isCtrlPressed == false) {
+            element.setAttribute("style", `display: none;height: 0px; width: 0px;`);
             return;
         }
         getLinks(elWidth, elHeight, elX, elY);
-        element.style.display = "none";
-        element.style.height = "0px";
-        element.style.width = "0px";
+        element.setAttribute("style", `display: none;height: 0px; width: 0px;`);
     });
     //get links from which are inside the rectangle
     function getLinks(width, height, x, y) {
         let links = document.querySelectorAll("a"),
-            validLinks = [], datas = [];
-        links.forEach((elem) => {
-            let measures = elem.getBoundingClientRect(),
-                linkX = measures.x,
-                linkWidth = measures.width,
-                linkY = measures.y,
-                linkHeight = measures.height;
-            if ((linkX >= x && linkX <= width + x) || ((linkX + linkWidth) >= x && (linkX + linkWidth) <= x + width)) {
-                if ((linkY >= y && linkY <= y + height) || ((linkY + linkHeight) >= y && (linkY + linkHeight) <= y + height)) {
-                    if (elem.href.trim() !== "") {
+            validLinks = [], datas = [], measures, linkX, linkWidth, linkY, linkHeight;
+        links.forEach(elem => {
+            measures = elem.getBoundingClientRect();
+            linkX = measures.x;
+            linkWidth = measures.width;
+            linkY = measures.y;
+            linkHeight = measures.height;
+            if (elem.href.trim() !== "") {
+                if ((linkX >= x && linkX <= width + x) || ((linkX + linkWidth) >= x && (linkX + linkWidth) <= x + width)) {
+                    if ((linkY >= y && linkY <= y + height) || ((linkY + linkHeight) >= y && (linkY + linkHeight) <= y + height)) {
                         validLinks.push(elem);
                         datas.push({ href: elem.href, aText: elem.innerText });
-                    } else {
-                        
                     }
-
-                }
-            } else if (((x >= linkX) && x <= (linkX + linkWidth)) && (((linkY >= y) || (linkY + linkHeight >= y)) && linkY <= (y + height))) {
-                if (elem.href.trim() !== "") {
+                } else if (((x >= linkX) && x <= (linkX + linkWidth)) && (((linkY >= y) || (linkY + linkHeight >= y)) && linkY <= (y + height))) {
                     validLinks.push(elem);
                     datas.push({ href: elem.href, aText: elem.innerText });
-                } else {
-                    console.log(elem)
                 }
             }
         });
-        if (validLinks.length !== 0) {
-            
-            validLinks.forEach((valLink) => {
+        if (validLinks.length) {
+            validLinks.forEach(valLink => {
                 valLink.style.border = "1px dotted #000";
             });
-            chrome.runtime.sendMessage({ link: datas, isLink: true }, (response) => {
+            cRun.sendMessage({ link: datas, isLink: true }, response => {
                 if (response.success === true) {
                     setTimeout(() => {
-                        validLinks.forEach((item) => {
-                            item.style.border = null;
+                        validLinks.forEach(item => {
+                            item.style.border = "none";
                         })
                     }, 500);
                 }
@@ -87,44 +73,37 @@
     //handle mouse down event
     window.addEventListener("mousedown", manageMouseDown);
     function manageMouseDown(event) {
-        if (event.buttons === 2 && (event.target.tagName == "A" || event.target.parentElement.tagName == "A")) {
-            if (event.target.parentElement.tagName == "A"){
-                if (event.target.parentElement.classList.contains("selectiveLinks")) {
-                    let selectedLink = document.getElementsByClassName("selectiveLinks").length;
-                    chrome.runtime.sendMessage({ updateMenu: true, selectedLink });
+        event.preventDefault();
+        let mouseDownX = event.clientX, mouseDownY = event.clientY, targ = event.target,
+            selectedLink = document.querySelectorAll("a.selectiveLinks").length;
+        if (event.buttons === 2 && (targ.tagName == "A" || targ.parentElement.tagName == "A")) {
+            if (targ.parentElement.tagName == "A") {
+                if (targ.parentElement.classList.contains("selectiveLinks")) {
+                    cRun.sendMessage({ updateMenu: true, selectedLink });
                 } else {
-                    chrome.runtime.sendMessage({ addMenu: true });
-                    event.target.parentElement.classList.add("findLink");
+                    cRun.sendMessage({ addMenu: true });
+                    targ.parentElement.classList.add("findLink");
                 }
-            }else{
-                if (event.target.classList.contains("selectiveLinks")) {
-                    let selectedLink = document.getElementsByClassName("selectiveLinks").length;
-                    chrome.runtime.sendMessage({ updateMenu: true, selectedLink });
+            } else {
+                if (targ.classList.contains("selectiveLinks")) {
+                    cRun.sendMessage({ updateMenu: true, selectedLink });
                 } else {
-                    chrome.runtime.sendMessage({ addMenu: true });
-                    event.target.classList.add("findLink");
+                    cRun.sendMessage({ addMenu: true });
+                    targ.classList.add("findLink");
                 }
             }
 
         }
         if (event.altKey === true) {
-        event.preventDefault();
             handleSelectiveClick(event);
             return;
-        }
-        if (event.ctrlKey === false) {
+        } else if (event.ctrlKey === false) {
             isCtrlPressed = false;
             return;
         } else {
             isCtrlPressed = true;
         }
-
-        event.preventDefault();
-        let mouseDownX = event.clientX,
-            mousedownY = event.clientY;
-        element.style.display = "block";
-        element.style.top = event.clientY + "px";
-        element.style.left = event.clientX + "px";
+        element.setAttribute("style", `display:block;top:${mouseDownY}px;left:${mouseDownX}px;`);
         //adding mouse move event listener
         disposer = ownAddEventListener(window, 'mousemove', manageMouseMove, false);
         function manageMouseMove(eve) {
@@ -132,9 +111,9 @@
                 let movingClientX = eve.clientX,
                     movingClientY = eve.clientY;
                 if (movingClientX >= mouseDownX) {
-                    element.style.width = eve.clientX - mouseDownX + "px";
-                    if (movingClientY >= mousedownY) {
-                        element.style.height = eve.clientY - mousedownY + "px";
+                    element.style.width = movingClientX - mouseDownX + "px";
+                    if (movingClientY >= mouseDownY) {
+                        element.style.height = movingClientY - mouseDownY + "px";
                     }
                 }
             }
@@ -142,65 +121,71 @@
 
     }
     //handle addressbar request
-    chrome.runtime.onMessage.addListener(
+    cRun.onMessage.addListener(
         function (request, sender, sendResponse) {
             if (request.needLink == true) {
-                let  aText = "address bar",
+                let aText = "address bar",
                     link = window.location.href;
-                chrome.runtime.sendMessage({ link: [{ aText, href: link }], isLink: true }, (response) => {
-                    if (response.success == true) {
+                cRun.sendMessage({ link: [{ aText, href: link }], isLink: true }, response => {
+                    if (response.success) {
                         sendResponse({ linkAdded: true });
                     }
                 });
-                return true;
             } else if (request.getLink === true) {
-                let selectedLink = document.getElementsByClassName("selectiveLinks"), data = [];
-                for (let i = 0; i < selectedLink.length; i++) {
-                    let element = selectedLink[i];
-                    data.push({ href: element.href, aText: element.innerText});
+                let selectedLink = document.getElementsByClassName("selectiveLinks"), data = [], i, selLinkLen = selectedLink.length, element;
+                for (i = 0; i < selLinkLen; i++) {
+                    element = selectedLink[i];
+                    data.push({ href: element.href, aText: element.innerText });
                 }
-                chrome.runtime.sendMessage({ link: data, isLink: true }, (res) => {
+                cRun.sendMessage({ link: data, isLink: true }, (res) => {
                     if (res.success) {
-                        let selectedLink = document.querySelectorAll("a");
-                        for (let i = 0; i < selectedLink.length; i++) {
-                            if (selectedLink[i].classList.contains("selectiveLinks")) {
-                                selectedLink[i].classList.remove("selectiveLinks");
+                        let selectedLink = document.querySelectorAll("a"), i, selLinkLen = selectedLink.length, selLinkClassList;
+                        for (i = 0; i < selLinkLen; i++) {
+                            selLinkClassList = selectedLink[i];
+                            if (selLinkClassList.contains("selectiveLinks")) {
+                                selLinkClassList.remove("selectiveLinks");
                             }
                         }
                     }
                 })
             } else if (request.getSingleLink) {
-                let singleLink = document.getElementsByClassName("findLink")[0], data = [];
-                if(singleLink.tagName!=="A"){
+                let singleLink = document.querySelector("findLink"), data = [];
+                if (singleLink.tagName !== "A") {
                     singleLink = singleLink.parentElement;
                 }
-                
-                data.push({ href: singleLink.href, aText: singleLink.innerText});
-                chrome.runtime.sendMessage({ link: data, isLink: true }, (res) => {
+                data.push({ href: singleLink.href, aText: singleLink.innerText });
+                cRun.sendMessage({ link: data, isLink: true }, (res) => {
                     if (res.success) {
-                        let links = document.querySelectorAll("a");
-                        for (let i = 0; i < links.length; i++) {
-                            if (links[i].classList.contains("findLink")) {
-                                links[i].classList.remove("findLink");
+                        let links = document.querySelectorAll("a"), i, linkLen = links.length, linkClassList;
+                        for (i = 0; i < linkLen; i++) {
+                            linkClassList = links[i];
+                            if (linkClassList.contains("findLink")) {
+                                linkClassList.remove("findLink");
                             }
                         }
                     }
                 })
+            }else if(request.getAllLinks){
+               let allLinks = document.querySelectorAll("a"),i,linkLen = allLinks.length,links=[],link;
+               for ( i = 0; i < linkLen; i++) {
+                link = allLinks[i];
+                links.push({href:link.href,aText: link.innerText});
+               }
+               sendResponse({links});
             }
+            return true;
         });
     //handle selected clicks
     function handleSelectiveClick(eve) {
-        if (eve.target.tagName === "A" || eve.target.parentElement.tagName=="A") {
-            if(eve.target.tagName==="A"){
-                eve.target.classList.add("selectiveLinks");
-            }else{
-                eve.target.parentElement.classList.add("selectiveLinks");
-            }
-            altElement.style.display = "block";
-            altElement.style.top = eve.clientY + "px";
-            altElement.style.left = eve.clientX + "px";
-            let selectedLink = document.getElementsByClassName("selectiveLinks").length;
-            chrome.runtime.sendMessage({ updateMenu: true, selectedLink });
+        let targ = eve.target, selectedLink,
+            altElement = document.createElement("div");
+        altElement.className = "altBox";
+        document.body.appendChild(altElement);
+        if (targ.tagName === "A" || targ.parentElement.tagName == "A") {
+            targ.tagName === "A" ? targ.classList.add("selectiveLinks") : targ.parentElement.classList.add("selectiveLinks");
+            altElement.setAttribute("style", `display: block;top:${eve.clientY}px;left:${eve.clientX}px;`);
+            selectedLink = document.querySelectorAll("a.selectiveLinks").length;
+            cRun.sendMessage({ updateMenu: true, selectedLink });
         }
     }
 
