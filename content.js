@@ -166,12 +166,12 @@
                     }
                 })
             }else if(request.getAllLinks){
-               let allLinks = document.querySelectorAll("a"),i,linkLen = allLinks.length,links=[],link;
+               let allLinks = document.querySelectorAll("a"),i,linkLen = allLinks.length,links=[],link,eLinkNum =0;
                for ( i = 0; i < linkLen; i++) {
                 link = allLinks[i];
-                links.push({href:link.href,aText: link.innerText});
+                   if (link.href.trim() === "") { eLinkNum++ } else { links.push({ href: link.href, aText: link.innerText });}
                }
-               sendResponse({links});
+               sendResponse({links,eLinkNum,website: window.location.href});
             }
             return true;
         });

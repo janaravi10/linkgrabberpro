@@ -4,6 +4,7 @@ html,body{
      font-family: Verdana, Geneva, Tahoma, sans-serif;
      box-sizing: border-box;
      height: 100%;
+     overflow-x: hidden;
 }
 .container{
 height: auto;
@@ -26,7 +27,7 @@ height: auto;
 }
 .linkCon{
   position: relative;
-  min-height: 30px;
+  min-height: 34px;
   background-color: rgb(241, 241, 241);
   display: flex;
   align-items: center;
@@ -37,6 +38,7 @@ height: auto;
 .linkCon a{
    border-bottom: 1px solid rgba(139, 139, 139, 0);
     font-size: 16px;
+    padding: 2px 0px;
 }
 .linkCon:nth-child(even){
     background-color: rgb(255, 255, 255);

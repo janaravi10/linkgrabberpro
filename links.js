@@ -57,12 +57,6 @@
         }
     }
     getStorage("data", handleValue, false);
-    // add delete event lisener 
-    function updateLinkCount(shownValue, total, duplicates) {
-        document.querySelector("span.duplicates").innerText = duplicates;
-        document.querySelector("span.shownLink").innerText = shownValue;
-        document.querySelector("span.linkNum").innerText = total;
-    }
     handleDelete();
     function handleDelete() {
         let div = document.querySelector("div.container");
@@ -95,6 +89,11 @@
                 getStorage("data", delData, cBoxStatus);
             }
         });
+    } 
+    function updateLinkCount(shownValue, total, duplicates) {
+        document.querySelector("span.duplicates").innerText = duplicates;
+        document.querySelector("span.shownLink").innerText = shownValue;
+        document.querySelector("span.linkNum").innerText = total;
     }
     let cbDuplicate = document.querySelector("input[type='checkbox']#checkboxInput");
     cbDuplicate.addEventListener("change", e => {
