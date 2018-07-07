@@ -34,23 +34,37 @@
     });
     //get links from which are inside the rectangle
     function getLinks(width, height, x, y) {
+        function isVisible(ele) {
+            var style = window.getComputedStyle(ele);
+            if (style.width === 0 ||
+                style.height === 0 ||
+                style.opacity === 0 ||
+                style.display === 'none' ||
+                style.visibility === 'hidden') {
+                return false;
+            } else {
+                return true;
+            }
+        }
         let links = document.querySelectorAll("a"),
             validLinks = [], datas = [], measures, linkX, linkWidth, linkY, linkHeight;
-        links.forEach(elem => {
-            measures = elem.getBoundingClientRect();
-            linkX = measures.x;
-            linkWidth = measures.width;
-            linkY = measures.y;
-            linkHeight = measures.height;
-            if (elem.href.trim() !== "") {
-                if ((linkX >= x && linkX <= width + x) || ((linkX + linkWidth) >= x && (linkX + linkWidth) <= x + width)) {
-                    if ((linkY >= y && linkY <= y + height) || ((linkY + linkHeight) >= y && (linkY + linkHeight) <= y + height)) {
+        links.forEach((elem) => {
+            let measures = elem.getBoundingClientRect(),
+                linkX = measures.x,
+                linkWidth = measures.width,
+                linkY = measures.y,
+                linkHeight = measures.height;
+            if ((linkX >= x && linkX <= width + x) || ((linkX + linkWidth) >= x && (linkX + linkWidth) <= x + width)) {
+                if ((linkY >= y && linkY <= y + height) || ((linkY + linkHeight) >= y && (linkY + linkHeight) <= y + height)) {
+                    if (elem.href.trim() !== "" && isVisible(elem) === true) {
                         validLinks.push(elem);
-                        datas.push({ href: elem.href, aText: elem.innerText });
+                        datas.push({ href: elem.href, aText: elem.innerText, domain });
                     }
-                } else if (((x >= linkX) && x <= (linkX + linkWidth)) && (((linkY >= y) || (linkY + linkHeight >= y)) && linkY <= (y + height))) {
+                }
+            } else if (((x >= linkX) && x <= (linkX + linkWidth)) && (((linkY >= y) || (linkY + linkHeight >= y)) && linkY <= (y + height))) {
+                if (elem.href.trim() !== "" && isVisible(elem) === true) {
                     validLinks.push(elem);
-                    datas.push({ href: elem.href, aText: elem.innerText });
+                    datas.push({ href: elem.href, aText: elem.innerText, domain });
                 }
             }
         });
