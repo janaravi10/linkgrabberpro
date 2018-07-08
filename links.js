@@ -47,7 +47,7 @@
         <div class="line"></div>
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
-         <button class='bin'><i class="fa fa-trash" aria-hidden="true"></i></button>
+         <button class='bin'><i class="demo-icon icon-trash"></i></button>
         </div>`;
                 function isAvail(val) {
                     return val.trim() === "" ? "No text available" : val;
