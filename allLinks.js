@@ -1,6 +1,5 @@
 (function () {
     let storage = chrome.storage.local;
- 
     function getStorage(fun, showDuplicate) {
         chrome.tabs.getCurrent(tab => {
             storage.get([""+tab.id], (e) => { fun(tab.id,e, showDuplicate);init(tab.id,e) });
@@ -49,7 +48,7 @@
         <div class="line"></div>
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
-          <button class='bin'><i class="fa fa-trash" aria-hidden="true"></i></button>
+          <button class='bin'><i class="demo-icon icon-trash"></i>
         </div>`;
                 function isAvail(val) {
                     return val.trim() === "" ? "No text available" : val;
@@ -60,39 +59,42 @@
     }
 
     getStorage(handleValue, false);
-    // handleDelete();
-    // function handleDelete() {
-    //     let div = document.querySelector("div.container");
-    //     div.addEventListener("click", ev => {
-    //         let clickedOn = ev.target;
-    //         if (clickedOn.tagName === "BUTTON" || clickedOn.tagName === "I") {
-    //             if (clickedOn.tagName === "BUTTON") {
-    //                 if (clickedOn.classList.contains("bin") === false) {
-    //                     return false;
-    //                 }
-    //             }
-    //             let cbDuplicate = document.querySelector("input#checkboxInput"),
-    //                 cBoxStatus;
-    //             cbDuplicate.checked ? cBoxStatus = true : cBoxStatus = false;
-    //             let id, parent = clickedOn.parentElement;
-    //             if (parent.tagName === "BUTTON") {
-    //                 id = Number(parent.parentElement.querySelector("span.numbers").getAttribute('data-id'));
-    //             } else {
-    //                 id = Number(parent.querySelector("span.numbers").getAttribute('data-id'));
-    //             }
-    //             id = --id;
-    //             function delData(val) {
-    //                 console.log(val);
-    //                 let data = val.currentData.map(e => e);
-    //                 data.splice(id, 1);
-    //                 storage.set({ data }, e => {
-    //                     if (e === undefined) removeList(cBoxStatus);
-    //                 });
-    //             }
-    //             getStorage("data", delData, cBoxStatus);
-    //         }
-    //     });
-    // }
+    handleDelete();
+    function handleDelete() {
+        let div = document.querySelector("div.container");
+        div.addEventListener("click", ev => {
+            let clickedOn = ev.target;
+            if (clickedOn.tagName === "BUTTON" || clickedOn.tagName === "I") {
+                if (clickedOn.tagName === "BUTTON") {
+                    if (clickedOn.classList.contains("bin") === false) {
+                        return false;
+                    }
+                }
+                let cbDuplicate = document.querySelector("input#checkboxInput"),
+                    cBoxStatus;
+                cbDuplicate.checked ? cBoxStatus = true : cBoxStatus = false;
+                let id, parent = clickedOn.parentElement;
+                if (parent.tagName === "BUTTON") {
+                    id = Number(parent.parentElement.querySelector("span.numbers").getAttribute('data-id'));
+                } else {
+                    id = Number(parent.querySelector("span.numbers").getAttribute('data-id'));
+                }
+                id = --id;
+                function delData(tab,val,showDuplicate) {
+                    console.log(val);
+                    let data = val[tab].currentData.map(e => e),
+                    otherVal = val[tab];
+                  
+                    data.splice(id, 1);
+                    otherVal.currentData = data;
+                    storage.set({ [tab]:otherVal }, e => {
+                        if (e === undefined) removeList(cBoxStatus);
+                    });
+                }
+                getStorage(delData, cBoxStatus);
+            }
+        });
+    }
     function updateLinkCount(shownValue, total) {
         document.querySelector("span.shownLink").innerText = shownValue;
         document.querySelector("span.linkNum").innerText = total;
