@@ -84,7 +84,6 @@
                     console.log(val);
                     let data = val[tab].currentData.map(e => e),
                     otherVal = val[tab];
-                  
                     data.splice(id, 1);
                     otherVal.currentData = data;
                     storage.set({ [tab]:otherVal }, e => {
@@ -135,34 +134,27 @@
         }
 
     }
-    // let delDuplicate = document.querySelector("button.delDuplicate");
-    // delDuplicate.addEventListener("click", handleDupeDel);
-    // function handleDupeDel(e) {
-    //     storage.get(['data'], value => {
-    //         let filteredValue = value.data.reduce(function (a, b, i) {
-    //             if (i !== 0) {
-    //                 let links = [];
-    //                 a.forEach(e => {
-    //                     links.push(e.href);
-    //                 });
-    //                 if (links.indexOf(b.href) < 0) { a.push(b) }
-    //                 return a;
-    //             } else {
-    //                 a.push(b);
-    //                 return a;
-    //             }
-    //         }, []);
-    //         if (value.data.length === filteredValue.length) {
-    //             swal("No duplicates", "You have no duplicates for deleting", "info");
-    //         } else {
-    //             storage.set({ data: filteredValue }, error => {
-    //                 swal("Success", "Duplicates deleted", "success");
-    //                 removeList(false);
-    //             });
-    //         }
-
-    //     })
-    // }
+    let delDuplicate = document.querySelector("button.delDuplicate");
+    delDuplicate.addEventListener("click", handleDupeDel);
+    function handleDupeDel(e) {
+        function delDupe(tab,val){
+           let filteredValue = duplicateMin(val[tab].currentData)[0];
+           console.log(`full ${val[tab].currentData.length} fill ${filteredValue.length}`)
+            if (val[tab].currentData.length === filteredValue.length) {
+                swal("No duplicates", "You have no duplicates for deleting", "info");
+            } else {
+                let otherVal = val[tab];
+                otherVal.currentData = filteredValue;
+                storage.set({ [tab]: otherVal }, error => {
+                    swal("Success", "Duplicates deleted", "success");
+                    removeList(false);
+                });
+            }
+        }
+        chrome.tabs.getCurrent(tab => {
+            storage.get(["" + tab.id], (e) => {delDupe(tab.id,e)});
+        });
+    }
      chrome.runtime.onMessage.addListener((request, sender, sendRes) => {
         chrome.storage.local.set({[request.tabId]: {currentData: request.data ,cURL: request.url,eLinkNum: request.eLinkNum}},error=>{
           console.log(error);
