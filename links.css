@@ -12,13 +12,16 @@ height: auto;
 }
 .header{
     width: 100%;
-    height: 50px;
+    min-height: 50px;
+    height: auto;
     background-color: rgb(38, 224, 248);
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.header h1{
+.header h2{
+ overflow-wrap: break-word;
+    display: inline-block;
     margin: 0;
     text-align: center;
     color: #ffffff;
@@ -31,14 +34,15 @@ height: auto;
   background-color: rgb(241, 241, 241);
   display: flex;
   align-items: center;
-  /* justify-content: center; */
   padding-left: 15px;
   flex-direction: row;
 }
 .linkCon a{
    border-bottom: 1px solid rgba(139, 139, 139, 0);
-    font-size: 16px;
+    font-size: 14px;
     padding: 2px 0px;
+  overflow-wrap: break-word;
+  flex-grow: 10;
 }
 .linkCon:nth-child(even){
     background-color: rgb(255, 255, 255);
@@ -85,6 +89,7 @@ a{
       cursor: pointer;
       align-self: stretch;
       margin-left: auto;    
+      flex-shrink: 1;
 }
 
 button {
@@ -98,8 +103,8 @@ button {
 }
 .line{
     display: inline-block;
-    width: 2px;
-    background-color: #919191;
+    /* width: 2px; */
+    border-right: 2px solid #919191;
     margin-right: 5px;
    align-self: stretch;
 }
@@ -175,6 +180,6 @@ outline: none;
     display: none;
 }
 .lightup{
-    font-size: 16px;
+    font-size: 14px;
     background-color: rgb(89, 244, 255);
 }
