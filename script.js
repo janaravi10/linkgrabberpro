@@ -105,8 +105,8 @@ let showTabLink = document.querySelector('#showTabLinks');
 showTabLink.addEventListener("click",e=>{
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         chrome.tabs.sendMessage(tabs[0].id, { getAllLinks: true }, function (response) {
-            if (response.links.length) {
-                chrome.runtime.sendMessage({ createTab: true, data: response.links, eLinkNum:response.eLinkNum});
+            if (response.links.length) {   
+                chrome.runtime.sendMessage({ createTab: true, data: response.links, eLinkNum:response.eLinkNum,url: tabs[0].url});
             }
         });
     });
