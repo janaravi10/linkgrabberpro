@@ -50,7 +50,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         chrome.contextMenus.create({ id: sender.tab.id+'', contexts: ["link"], title: "Download " + request.selectedLink+" links" })
     }else if(request.createTab){
         chrome.tabs.create({ active: true, url: chrome.runtime.getURL("tablinks.html")},tab=>{
-         chrome.tabs.sendMessage(tab.id,{data: request.data,eLinkNum: request.eLinkNum});
+         chrome.tabs.sendMessage(tab.id,{data: request.data,eLinkNum: request.eLinkNum,url:request.url,tabId: tab.id});
         });
     }
   
