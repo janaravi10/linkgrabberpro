@@ -58,13 +58,13 @@
                 if ((linkY >= y && linkY <= y + height) || ((linkY + linkHeight) >= y && (linkY + linkHeight) <= y + height)) {
                     if (elem.href.trim() !== "" && isVisible(elem) === true) {
                         validLinks.push(elem);
-                        datas.push({ href: elem.href, aText: elem.innerText, domain });
+                        datas.push({ href: elem.href, aText: elem.innerText.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\&/g, "&amp;") });
                     }
                 }
             } else if (((x >= linkX) && x <= (linkX + linkWidth)) && (((linkY >= y) || (linkY + linkHeight >= y)) && linkY <= (y + height))) {
                 if (elem.href.trim() !== "" && isVisible(elem) === true) {
                     validLinks.push(elem);
-                    datas.push({ href: elem.href, aText: elem.innerText, domain });
+                    datas.push({ href: elem.href, aText: elem.innerText.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\&/g, "&amp;") });
                 }
             }
         });
@@ -87,7 +87,7 @@
     //handle mouse down event
     window.addEventListener("mousedown", manageMouseDown);
     function manageMouseDown(event) {
-        event.preventDefault();
+       
         let mouseDownX = event.clientX, mouseDownY = event.clientY, targ = event.target,
             selectedLink = document.querySelectorAll("a.selectiveLinks").length;
         if (event.buttons === 2 && (targ.tagName == "A" || targ.parentElement.tagName == "A")) {
@@ -117,6 +117,7 @@
         } else {
             isCtrlPressed = true;
         }
+        event.preventDefault();
         element.setAttribute("style", `display:block;top:${mouseDownY}px;left:${mouseDownX}px;`);
         //adding mouse move event listener
         disposer = ownAddEventListener(window, 'mousemove', manageMouseMove, false);
@@ -183,7 +184,7 @@
                let allLinks = document.querySelectorAll("a"),i,linkLen = allLinks.length,links=[],link,eLinkNum =0;
                for ( i = 0; i < linkLen; i++) {
                 link = allLinks[i];
-                   if (link.href.trim() === "") { eLinkNum++ } else { links.push({ href: link.href, aText: link.innerText });}
+                   if (link.href.trim() === "") { eLinkNum++ } else { links.push({ href: link.href, aText: valueForReg = link.innerText.replace(/\</g, "&lt;").replace(/\>/g, "&gt;").replace(/\&/g,"&amp;") });}
                }
                sendResponse({links,eLinkNum,website: window.location.href});
             }
