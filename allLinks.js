@@ -23,7 +23,13 @@
         return [reduced, dupe];
     }
     function handleValue(tab,value, showDuplicate) {
-        let data = value[tab].currentData;
+        let data;
+        if(tab===null){
+            data = value; 
+        }else{
+            data = value[tab].currentData;
+        }
+        // let data = value[tab].currentData;
         if (data.length <= 0) {
             let wholeElement = `<h1 class='alert'>You have no links</h1>`;
             document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
@@ -93,6 +99,31 @@
                 getStorage(delData, cBoxStatus);
             }
         });
+    }
+    let sortBtn = document.querySelector("button.sortBtn");
+    sortBtn.addEventListener("click", e => chrome.tabs.getCurrent(tab => {
+        chrome.storage.local.get(["" + tab.id], (e) => { handleSort(tab.id, e) });
+    }));
+
+    function handleSort(tabId, data) {
+        let { [tabId]: { currentData } } = data;
+        currentData = currentData.map(e => e);
+        let reg = /^https?:\/\/\w{1,}\.(\w{1,}(\.\w{1,})?\.\w{1,})/i, domain, returned;
+        function returnDomain(e) {
+            returned = reg.exec(e);
+            return returned === null ? e : returned[1];
+        }
+        let textA, textB;
+        currentData.sort(function (a, b) {
+            textA = returnDomain(a.href.toLowerCase());
+            textB = returnDomain(b.href.toLowerCase());
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        });
+        let linkCon = document.querySelectorAll("div.linkCon"), i, len = linkCon.length;
+        for (i = 0; i < len; i++) {
+            linkCon[i].parentElement.removeChild(linkCon[i]);
+        }
+        handleValue(null,currentData,true);
     }
     function updateLinkCount(shownValue, total) {
         document.querySelector("span.shownLink").innerText = shownValue;
