@@ -2,11 +2,18 @@ let searchBox = document.querySelector("input#filter");
 searchBox.addEventListener("keyup", handleSearch);
 function handleSearch(e) {
     console.log(e);
-    let links = document.querySelectorAll("a.link"), value = searchBox.value.trim().toLowerCase();
+    let links, value = searchBox.value.trim().toLowerCase();
     valueForReg = value;
     if (value !== "" && e.keyCode !== 8) {
-        links = document.querySelectorAll("div.showThis > a");
+        if(value.length !== 0){
+            links = document.querySelectorAll("a.link");
+        } else {
+            links = document.querySelectorAll("div.showThis > a");
+        }
+    } else {
+        links = document.querySelectorAll("a.link");
     }
+    console.log(links);
     valueForReg = valueForReg.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|\>\<]/g, "\\$&")
     if (value == "") { if (e.keyCode !== 8) return; };
     let i, len = links.length;
