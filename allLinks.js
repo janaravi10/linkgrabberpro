@@ -113,14 +113,17 @@
     let copyBtn = document.querySelector("button.copyButton");
     copyBtn.addEventListener("click", handleCopy);
     function handleCopy() {
-        storage.get(["data"], copyToClipboard);
-        function copyToClipboard(text) {
-            if (text.data.length === 0) {
+        chrome.tabs.getCurrent(tab => {
+            storage.get(["" + tab.id], e=>{copyToClipboard(tab.id,e)});
+        })
+        function copyToClipboard(tabId ,text) {
+            const {[tabId]: {currentData}} = text;
+            if (currentData.length === 0) {
                 swal("No links", "You have no links available", "info");
                 return;
             }
             let dataToCopy = '';
-            text.data.forEach(e => {
+            currentData.forEach(e => {
                 dataToCopy += `${e.href} \n`;
             });
             const input = document.createElement('input');
