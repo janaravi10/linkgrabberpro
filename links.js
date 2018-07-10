@@ -48,11 +48,11 @@
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
          <button class='bin'><i class="demo-icon icon-trash"></i></button>
-        </div>`;
-                function isAvail(val) {
-                    return val.trim() === "" ? "No text available" : val;
-                }
+        </div>`;  
             });
+            function isAvail(val) {
+                return val.trim() === "" ? "No text available" : val;
+            }
             document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
         }
     }
