@@ -29,7 +29,6 @@
         }else{
             data = value[tab].currentData;
         }
-        // let data = value[tab].currentData;
         if (data.length <= 0) {
             let wholeElement = `<h1 class='alert'>You have no links</h1>`;
             document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
@@ -107,7 +106,6 @@
 
     function handleSort(tabId, data) {
         let { [tabId]: { currentData } } = data;
-        currentData = currentData.map(e => e);
         let reg = /^https?:\/\/\w{1,}\.(\w{1,}(\.\w{1,})?\.\w{1,})/i, domain, returned;
         function returnDomain(e) {
             returned = reg.exec(e);
