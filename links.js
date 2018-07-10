@@ -3,8 +3,31 @@
     function getStorage(detail, fun, showDuplicate) {
         storage.get([detail], (e) => { fun(e, showDuplicate) });
     }
+    //sort function 
+    let sortBtn = document.querySelector("button.sortBtn");
+    sortBtn.addEventListener("click", e =>storage.get("data",handleSort)
+    );
+    function handleSort(data) {
+        let currentData = data.data,
+         reg = /^https?:\/\/\w{1,}\.(\w{1,}(\.\w{1,})?\.\w{1,})/i, domain, returned;
+        function returnDomain(e) {
+            returned = reg.exec(e);
+            return returned === null ? e : returned[1];
+        }
+        let textA, textB;
+        currentData.sort(function (a, b) {
+            textA = returnDomain(a.href.toLowerCase());
+            textB = returnDomain(b.href.toLowerCase());
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        });
+        let linkCon = document.querySelectorAll("div.linkCon"), i, len = linkCon.length;
+        for (i = 0; i < len; i++) {
+            linkCon[i].parentElement.removeChild(linkCon[i]);
+        }
+        handleValue(currentData, true);
+    }
     function handleValue(value, showDuplicate) {
-        let data = value.data;
+          let data = value.hasOwnProperty("data")===true?value.data:value;
         if (data.length <= 0) {
             let wholeElement = `<h1 class='alert'>You have no links</h1>`;
             document.querySelector("div.container").insertAdjacentHTML('beforeend', wholeElement);
