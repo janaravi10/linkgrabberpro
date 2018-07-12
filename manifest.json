@@ -10,7 +10,7 @@
     "permissions": [
         "activeTab",
         "<all_urls>",
-        "storage","notifications","contextMenus","clipboardWrite"
+        "storage","notifications","contextMenus","clipboardWrite","unlimitedStorage"
     ],
     "content_scripts": [
         {
