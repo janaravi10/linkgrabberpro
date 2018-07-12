@@ -2,8 +2,12 @@
     let storage = chrome.storage.local;
     function getStorage(fun, showDuplicate) {
         chrome.tabs.getCurrent(tab => {
-            storage.get([""+tab.id], (e) => { fun(tab.id,e, showDuplicate);init(tab.id,e) });
-        })
+            chrome.storage.local.get(tab.id+"",value=>{
+              if(value.length!==0){
+                  storage.get(["" + tab.id], (e) => { fun(tab.id, e, showDuplicate); init(tab.id, e) });
+              }
+            });
+        });
     }
     function duplicateMin(data) {
         let dupe = [], reduced = [];
@@ -142,18 +146,18 @@
     let copyBtn = document.querySelector("button.copyButton");
     copyBtn.addEventListener("click", handleCopy);
     function handleCopy() {
-        chrome.tabs.getCurrent(tab => {
-            storage.get(["" + tab.id], e=>{copyToClipboard(tab.id,e)});
-        })
-        function copyToClipboard(tabId ,text) {
-            const {[tabId]: {currentData}} = text;
-            if (currentData.length === 0) {
-                swal("No links", "You have no links available", "info");
-                return;
-            }
+        let link = document.querySelectorAll("a.link"),
+         i,len = link.length,currentData=[];
+         if(link.length===0){
+             swal("No links!", "sorry you have no links", "info");
+             return;
+         }
+        for (i = 0; i < len; i++) {
+        currentData.push(link[i].href);
+        }
             let dataToCopy = '';
             currentData.forEach(e => {
-                dataToCopy += `${e.href} \n`;
+                dataToCopy += `${e} \r\n`;
             });
             const input = document.createElement('input');
             input.setAttribute("style", `position: fixed;opacity:0;`);
@@ -163,8 +167,6 @@
             document.execCommand('Copy');
             document.body.removeChild(input);
             swal("Copied!", "Links copied successfully", "success");
-        }
-
     }
     let delDuplicate = document.querySelector("button.delDuplicate");
     delDuplicate.addEventListener("click", handleDupeDel);
