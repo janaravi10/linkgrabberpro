@@ -36,7 +36,7 @@
             let wholeElement = '',
                 filteredValue = [];
             let dupe = [], linkClass, duplicate;
-            if (showDuplicate === false) {
+            if (!showDuplicate) {
                 filteredValue = duplicateMin();
                 duplicate = data.length - filteredValue.length;
                 updateLinkCount(filteredValue.length, data.length, duplicate);
@@ -45,8 +45,8 @@
                 filteredValue = duplicateMin();
                 filLen = filteredValue.length;
                 duplicate = data.length - filLen;
-                filteredValue = data;
-                updateLinkCount(filLen, filLen, duplicate);
+                filteredValue = data; 
+                updateLinkCount(data.length, data.length, duplicate);
             }
             function duplicateMin() {
                 return data.reduce(function (a, b, i) {
@@ -133,26 +133,27 @@
     let copyBtn = document.querySelector("button.copyButton");
     copyBtn.addEventListener("click", handleCopy);
     function handleCopy() {
-        storage.get(["data"], copyToClipboard);
-        function copyToClipboard(text) {
-            if(text.data.length===0){
-                swal("No links","You have no links available","info");
-                return;
-            }
-            let dataToCopy = '';
-            text.data.forEach(e => {
-                dataToCopy += `${e.href} \n`;
-            });
-            const input = document.createElement('input');
-            input.setAttribute("style", `position: fixed;opacity:0;`);
-            input.value = dataToCopy;
-            document.body.appendChild(input);
-            input.select();
-            document.execCommand('Copy');
-            document.body.removeChild(input);
-            swal("Copied!", "Links copied successfully", "success");
+        let link = document.querySelectorAll("a.link"),
+            i, len = link.length, currentData = [];
+        if (link.length === 0) {
+            swal("No links!", "sorry you have no links", "info");
+            return;
         }
-
+        for (i = 0; i < len; i++) {
+            currentData.push(link[i].href);
+        }
+        let dataToCopy = '';
+        currentData.forEach(e => {
+            dataToCopy += `${e} \r\n`;
+        });
+        const input = document.createElement('input');
+        input.setAttribute("style", `position: fixed;opacity:0;`);
+        input.value = dataToCopy;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('Copy');
+        document.body.removeChild(input);
+        swal("Copied!", "Links copied successfully", "success");
     }
     let delDuplicate = document.querySelector("button.delDuplicate");
     delDuplicate.addEventListener("click", handleDupeDel);
