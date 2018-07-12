@@ -16,8 +16,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
                             sendResponse({success: true})
                             makeNotification(data.length);
                         }
-                    })
-                
+                    });
                 } else {
                     chrome.storage.local.set({ data }, (err) => {
                         if (err == undefined) {
@@ -67,7 +66,13 @@ function handler(option) {
         chrome.tabs.sendMessage(Number(option.menuItemId), { getLink: true }, function (response) {
             
         });
-    }
-  
-    
+    } 
 }
+chrome.tabs.onRemoved.addListener((tabId,obj)=>{
+    chrome.storage.local.get(null,value=>{
+    let arrVal = Object.keys(value);
+    if(arrVal.indexOf(tabId+"")!==-1){
+      chrome.storage.local.remove([tabId+""]);
+    }
+    });
+});
