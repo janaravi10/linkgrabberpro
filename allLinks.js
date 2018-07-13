@@ -2,31 +2,39 @@
     let storage = chrome.storage.local;
     function getStorage(fun, showDuplicate) {
         chrome.tabs.getCurrent(tab => {
+            console.log(tab);
             chrome.storage.local.get(tab.id+"",value=>{
               if(value.length!==0){
                   storage.get(["" + tab.id], (e) => { fun(tab.id, e, showDuplicate); init(tab.id, e) });
+              }else{
+                  swal("Unknown Error!", "Sorry we are unable to fetch links :(", "error");
               }
             });
         });
     }
     function duplicateMin(data) {
         let dupe = [], reduced = [];
-        reduced = data.reduce(function (a, b, i) {
-            if (i !== 0) {
+        reduced = data.reduce(function (prevVal, currentVal, index) {
+            if (index !== 0) {
                 let links = [];
-                a.forEach(e => {
+                prevVal.forEach(e => {
                     links.push(e.href);
                 });
-                if (links.indexOf(b.href) < 0) { a.push(b) } else { dupe.push(b.href) }
-                return a;
+                if (links.indexOf(currentVal.href) < 0) { currentVal.index = index;prevVal.push(currentVal); } else { dupe.push(currentVal.href) }
+                return prevVal;
             } else {
-                a.push(b);
-                return a;
+                currentVal.index = index;
+                prevVal.push(currentVal);
+                return prevVal;
             }
         }, []);
         return [reduced, dupe];
     }
     function handleValue(tab,value, showDuplicate) {
+        if(value.length===0){
+            swal("Unknown Error:(", "Sorry we are unable to fetch links :(", "error");
+            return;
+        }
         let data;
         if(tab===null){
             data = value; 
@@ -47,13 +55,13 @@
                 filteredValue = returnedVal[0];
                 updateLinkCount(filteredValue.length, dLen);
             } else if (showDuplicate === true) {
-                filteredValue = data;
+                filteredValue = data.map((e,index)=>{e.index = index;return e;});
                 updateLinkCount(dLen, dLen);
             }
             filteredValue.forEach((element, i) => {
                 dupe.indexOf(element.href) !== -1 ? linkClass = "dupe" : linkClass = "";
                 wholeElement += `<div class="linkCon">
-        <span class="numbers" data-id='${i + 1}'>${i + 1}</span>
+        <span class="numbers" data-id='${element.index + 1}'>${i + 1}</span>
         <div class="line"></div>
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
@@ -90,7 +98,6 @@
                 }
                 id = --id;
                 function delData(tab,val,showDuplicate) {
-                    console.log(val);
                     let data = val[tab].currentData.map(e => e),
                     otherVal = val[tab];
                     data.splice(id, 1);
@@ -110,10 +117,10 @@
 
     function handleSort(tabId, data) {
         let { [tabId]: { currentData } } = data;
-        let reg = /^https?:\/\/\w{1,}\.(\w{1,}(\.\w{1,})?\.\w{1,})/i, domain, returned;
+        let reg = /^https?:\/\/(\w{1,}\.)?(\w{1,}(\.\w{1,})?\.\w{1,})/i, domain, returned;
         function returnDomain(e) {
             returned = reg.exec(e);
-            return returned === null ? e : returned[1];
+            return returned === null ? e : returned[2];
         }
         let textA, textB;
         currentData.sort(function (a, b) {
@@ -179,6 +186,7 @@
             } else {
                 let otherVal = val[tab];
                 otherVal.currentData = filteredValue;
+                console.log(tab);
                 storage.set({ [tab]: otherVal }, error => {
                     swal("Success", "Duplicates deleted", "success");
                     removeList(false);
@@ -191,8 +199,9 @@
     }
      chrome.runtime.onMessage.addListener((request, sender, sendRes) => {
         chrome.storage.local.set({[request.tabId]: {currentData: request.data ,cURL: request.url,eLinkNum: request.eLinkNum}},error=>{
-          console.log(error);
-          getStorage(handleValue,false);
+            if(chrome.runtime.lastError!==undefined){
+                console.log(chrome.runtime.lastError);
+            }
         })
     });
     function init(tab,data){
