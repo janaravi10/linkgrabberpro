@@ -76,3 +76,14 @@ chrome.tabs.onRemoved.addListener((tabId,obj)=>{
     }
     });
 });
+chrome.runtime.onStartup.addListener(()=>{
+    chrome.storage.local.get(null,(value)=>{
+        let keys = Object.keys(value);
+        keys.forEach(e=>{
+            if(e!=="data"){
+                chrome.storage.local.remove(e);
+            }
+           
+        })
+    })
+})
