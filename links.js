@@ -45,28 +45,29 @@
                 filteredValue = duplicateMin();
                 filLen = filteredValue.length;
                 duplicate = data.length - filLen;
-                filteredValue = data; 
+                filteredValue = data.map((e, index) => { e.index = index; return e; }); 
                 updateLinkCount(data.length, data.length, duplicate);
             }
             function duplicateMin() {
-                return data.reduce(function (a, b, i) {
-                    if (i !== 0) {
+                return data.reduce(function (prevVal, currentVal, index) {
+                    if (index !== 0) {
                         let links = [];
-                        a.forEach(e => {
+                        prevVal.forEach(e => {
                             links.push(e.href);
                         });
-                        if (links.indexOf(b.href) < 0) { a.push(b) } else { dupe.push(b.href) }
-                        return a;
+                        if (links.indexOf(currentVal.href) < 0) { currentVal.index = index; prevVal.push(currentVal); } else { dupe.push(currentVal.href) }
+                        return prevVal;
                     } else {
-                        a.push(b);
-                        return a;
+                        currentVal.index = index;
+                        prevVal.push(currentVal);
+                        return prevVal;
                     }
                 }, []);
             }
             filteredValue.forEach((element, i) => {
                 dupe.indexOf(element.href) !== -1 ? linkClass = "dupe" : linkClass = "";
                 wholeElement += `<div class="linkCon">
-        <span class="numbers" data-id='${i + 1}'>${i + 1}</span>
+        <span class="numbers" data-id='${element.index + 1}'>${i + 1}</span>
         <div class="line"></div>
         <a href="${element.href}" class='link ${linkClass}'>${element.href}</a>
         <span class="aText">${isAvail(element.aText)}</span>
