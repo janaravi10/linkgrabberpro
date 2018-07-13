@@ -45,7 +45,6 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         chrome.contextMenus.create({ id: sender.tab.id+"sample", contexts: ["link"], title:"Add single link"})
     } else if (request.updateMenu){
         chrome.contextMenus.removeAll();
-        
         chrome.contextMenus.create({ id: sender.tab.id+'', contexts: ["link"], title: "Download " + request.selectedLink+" links" })
     }else if(request.createTab){
         chrome.tabs.create({ active: true, url: chrome.runtime.getURL("tablinks.html")},tab=>{
