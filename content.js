@@ -87,7 +87,6 @@
     //handle mouse down event
     window.addEventListener("mousedown", manageMouseDown);
     function manageMouseDown(event) {
-       
         let mouseDownX = event.clientX, mouseDownY = event.clientY, targ = event.target,
             selectedLink = document.querySelectorAll("a.selectiveLinks").length;
         if (event.buttons === 2 && (targ.tagName == "A" || targ.parentElement.tagName == "A")) {
@@ -153,10 +152,12 @@
                     data.push({ href: element.href, aText: element.innerText });
                 }
                 cRun.sendMessage({ link: data, isLink: true }, (res) => {
+                    console.log(res);
                     if (res.success) {
                         let selectedLink = document.querySelectorAll("a"), i, selLinkLen = selectedLink.length, selLinkClassList;
+                        console.log(selectedLink);
                         for (i = 0; i < selLinkLen; i++) {
-                            selLinkClassList = selectedLink[i];
+                            selLinkClassList = selectedLink[i].classList;
                             if (selLinkClassList.contains("selectiveLinks")) {
                                 selLinkClassList.remove("selectiveLinks");
                             }
@@ -164,7 +165,7 @@
                     }
                 })
             } else if (request.getSingleLink) {
-                let singleLink = document.querySelector("findLink"), data = [];
+                let singleLink = document.querySelector(".findLink"), data = [];
                 if (singleLink.tagName !== "A") {
                     singleLink = singleLink.parentElement;
                 }
@@ -173,7 +174,7 @@
                     if (res.success) {
                         let links = document.querySelectorAll("a"), i, linkLen = links.length, linkClassList;
                         for (i = 0; i < linkLen; i++) {
-                            linkClassList = links[i];
+                            linkClassList = links[i].classList;
                             if (linkClassList.contains("findLink")) {
                                 linkClassList.remove("findLink");
                             }
