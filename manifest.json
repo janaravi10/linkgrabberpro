@@ -2,10 +2,14 @@
     "manifest_version": 2,
     "name": "Link grabber pro",
     "version": "1.0",
-    "description": "Gather links from various website and download as csv!",
+    "description": "Extract links from various website and also analyse it!",
     "browser_action": {
-        "default_title": "Get your links",
+        "default_title": "Manage your links",
         "default_popup":"popup.html"
+    },"icons": {
+        "16": "16.png",
+        "32": "32.png",
+        "128": "128.png"
     },
     "permissions": [
         "activeTab",
